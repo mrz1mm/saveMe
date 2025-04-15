@@ -1,0 +1,162 @@
+<div class="register-container">
+  <div class="register-card">
+    <h2 class="register-title">Registrati a SaveMe</h2>
+
+    <form
+      [formGroup]="registerForm"
+      (ngSubmit)="onSubmit()"
+      class="register-form"
+    >
+      <!-- Alert di errore -->
+      <div *ngIf="isRegisterError" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Alert di successo -->
+      <div *ngIf="isSuccess" class="alert alert-success">
+        Registrazione completata con successo! Verrai reindirizzato alla pagina
+        di login...
+      </div>
+
+      <!-- Campo username -->
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          formControlName="username"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('username')?.invalid &&
+              registerForm.get('username')?.touched
+          }"
+          placeholder="Scegli un username"
+        />
+        <div
+          *ngIf="
+            registerForm.get('username')?.invalid &&
+            registerForm.get('username')?.touched
+          "
+          class="invalid-feedback"
+        >
+          <span *ngIf="registerForm.get('username')?.errors?.['required']"
+            >Username obbligatorio</span
+          >
+          <span *ngIf="registerForm.get('username')?.errors?.['minlength']"
+            >L'username deve essere di almeno 3 caratteri</span
+          >
+        </div>
+      </div>
+
+      <!-- Campo email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('email')?.invalid &&
+              registerForm.get('email')?.touched
+          }"
+          placeholder="Inserisci la tua email"
+        />
+        <div
+          *ngIf="
+            registerForm.get('email')?.invalid &&
+            registerForm.get('email')?.touched
+          "
+          class="invalid-feedback"
+        >
+          <span *ngIf="registerForm.get('email')?.errors?.['required']"
+            >Email obbligatoria</span
+          >
+          <span *ngIf="registerForm.get('email')?.errors?.['email']"
+            >Email non valida</span
+          >
+        </div>
+      </div>
+
+      <!-- Campo password -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              registerForm.get('password')?.invalid &&
+              registerForm.get('password')?.touched
+          }"
+          placeholder="Crea una password sicura"
+        />
+        <div
+          *ngIf="
+            registerForm.get('password')?.invalid &&
+            registerForm.get('password')?.touched
+          "
+          class="invalid-feedback"
+        >
+          <span *ngIf="registerForm.get('password')?.errors?.['required']"
+            >Password obbligatoria</span
+          >
+          <span *ngIf="registerForm.get('password')?.errors?.['minlength']"
+            >La password deve essere di almeno 6 caratteri</span
+          >
+        </div>
+      </div>
+
+      <!-- Campo conferma password -->
+      <div class="form-group">
+        <label for="confirmPassword">Conferma Password</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              (registerForm.get('confirmPassword')?.invalid ||
+                registerForm.hasError('notMatching')) &&
+              registerForm.get('confirmPassword')?.touched
+          }"
+          placeholder="Conferma la tua password"
+        />
+        <div
+          *ngIf="registerForm.get('confirmPassword')?.touched"
+          class="invalid-feedback"
+        >
+          <span
+            *ngIf="registerForm.get('confirmPassword')?.errors?.['required']"
+            >Conferma password obbligatoria</span
+          >
+          <span *ngIf="registerForm.hasError('notMatching')"
+            >Le password non coincidono</span
+          >
+        </div>
+      </div>
+
+      <!-- Pulsante di submit -->
+      <button
+        type="submit"
+        class="btn btn-primary btn-block"
+        [disabled]="registerForm.invalid || isLoading"
+      >
+        <span
+          *ngIf="isLoading"
+          class="spinner-border spinner-border-sm mr-1"
+        ></span>
+        Registrati
+      </button>
+    </form>
+
+    <div class="register-footer">
+      Hai già un account? <a routerLink="/login">Accedi</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,179 @@
+<div class="file-browser-container">
+  <!-- Barra di navigazione superiore -->
+  <div class="browser-header">
+    <div class="breadcrumbs">
+      <!-- Breadcrumb root -->
+      <span class="breadcrumb-item" (click)="navigateToFolder(null)">
+        <i class="fa fa-home"></i> Root
+      </span>
+
+      <!-- Breadcrumbs dinamiche -->
+      <ng-container *ngFor="let folder of breadcrumbs; let i = index">
+        <span class="breadcrumb-separator">/</span>
+        <span
+          class="breadcrumb-item"
+          [class.active]="i === breadcrumbs.length - 1"
+          (click)="navigateToFolder(folder.id)"
+        >
+          {{ folder.name }}
+        </span>
+      </ng-container>
+    </div>
+
+    <!-- Azioni -->
+    <div class="browser-actions">
+      <button class="btn btn-primary" (click)="showNewFolderForm()">
+        <i class="fa fa-folder-plus"></i> Nuova Cartella
+      </button>
+
+      <label class="btn btn-success upload-btn">
+        <i class="fa fa-upload"></i> Carica File
+        <input
+          type="file"
+          hidden
+          multiple
+          (change)="uploadFiles($event)"
+          [disabled]="isUploading"
+        />
+      </label>
+
+      <button
+        class="btn btn-danger"
+        [disabled]="Object.keys(selectedItems).length === 0"
+        (click)="deleteSelected()"
+      >
+        <i class="fa fa-trash"></i> Elimina
+      </button>
+    </div>
+  </div>
+
+  <!-- Form per la creazione di nuove cartelle -->
+  <div *ngIf="isCreatingFolder" class="new-folder-form">
+    <form [formGroup]="newFolderForm" (ngSubmit)="createNewFolder()">
+      <div class="form-group">
+        <label for="folderName">Nome Cartella</label>
+        <input
+          type="text"
+          id="folderName"
+          formControlName="folderName"
+          class="form-control"
+          placeholder="Inserisci il nome della cartella"
+          autofocus
+        />
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="newFolderForm.invalid"
+        >
+          Crea
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="isCreatingFolder = false"
+        >
+          Annulla
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Indicatore di caricamento -->
+  <div *ngIf="isLoading" class="loading-indicator">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Caricamento...</span>
+    </div>
+    <p>Caricamento contenuto...</p>
+  </div>
+
+  <!-- Indicatore di upload -->
+  <div *ngIf="isUploading" class="upload-progress">
+    <div class="progress">
+      <div
+        class="progress-bar progress-bar-striped progress-bar-animated"
+        role="progressbar"
+        [style.width.%]="uploadProgress"
+        aria-valuenow="uploadProgress"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        {{ uploadProgress }}%
+      </div>
+    </div>
+    <p>Caricamento file in corso...</p>
+  </div>
+
+  <!-- Contenuto principale -->
+  <div *ngIf="!isLoading" class="browser-content">
+    <!-- Messaggio per directory vuota -->
+    <div
+      *ngIf="folders.length === 0 && files.length === 0"
+      class="empty-directory"
+    >
+      <i class="fa fa-folder-open"></i>
+      <p>Questa cartella è vuota.</p>
+      <p>Carica file o crea nuove cartelle per iniziare.</p>
+    </div>
+
+    <!-- Griglia delle cartelle -->
+    <div *ngIf="folders.length > 0" class="folders-grid">
+      <div
+        *ngFor="let folder of folders"
+        class="folder-item"
+        [class.selected]="isSelected(folder.id, 'FOLDER')"
+        (click)="toggleSelect(folder, 'FOLDER')"
+        (dblclick)="navigateToFolder(folder.id)"
+      >
+        <div class="folder-icon">
+          <i class="fa fa-folder"></i>
+        </div>
+        <div class="folder-name">{{ folder.name }}</div>
+        <div class="folder-details">
+          <small>{{ folder.createdAt | date : "medium" }}</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Griglia dei file -->
+    <div *ngIf="files.length > 0" class="files-grid">
+      <div
+        *ngFor="let file of files"
+        class="file-item"
+        [class.selected]="isSelected(file.id, 'FILE')"
+        (click)="toggleSelect(file, 'FILE')"
+        (dblclick)="downloadFile(file)"
+      >
+        <div class="file-icon">
+          <i
+            class="fa"
+            [ngClass]="{
+              'fa-file-image': file.contentType.includes('image'),
+              'fa-file-pdf': file.contentType.includes('pdf'),
+              'fa-file-word': file.contentType.includes('word'),
+              'fa-file-excel': file.contentType.includes('excel'),
+              'fa-file-audio': file.contentType.includes('audio'),
+              'fa-file-video': file.contentType.includes('video'),
+              'fa-file-alt':
+                !file.contentType.includes('image') &&
+                !file.contentType.includes('pdf') &&
+                !file.contentType.includes('word') &&
+                !file.contentType.includes('excel') &&
+                !file.contentType.includes('audio') &&
+                !file.contentType.includes('video')
+            }"
+          ></i>
+        </div>
+        <div class="file-name">{{ file.originalFileName }}</div>
+        <div class="file-details">
+          <small
+            >{{ formatFileSize(file.size) }} -
+            {{ file.createdAt | date : "medium" }}</small
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
